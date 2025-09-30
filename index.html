@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffee Party – Pitch de Negocio Estratégico</title>
+    <!-- Carga de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carga de fuentes -->
+    <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@700;800&family=Lato:wght@300;400&family=Montserrat:wght@300;800&display=swap" rel="stylesheet">
+    <style>
+        /* Configuración de la paleta y tipografía */
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'fondo-claro': '#F5F1E7',
+                        'accent-verde': '#3B5D3A',
+                        'accent-terracota': '#C96A3D',
+                        'texto-principal': '#333333',
+                    },
+                    fontFamily: {
+                        'title': ['Geologica', 'Montserrat', 'sans-serif'],
+                        'body': ['Lato', 'Montserrat', 'sans-serif'],
+                    }
+                }
+            }
+        }
+
+        /* Estilos base de las secciones */
+        .slide {
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative; 
+            padding: 2rem;
+            box-sizing: border-box;
+            scroll-snap-align: start; 
+        }
+        
+        .img-effect {
+            transition: transform 0.5s ease-out, box-shadow 0.5s ease-out;
+            transform: scale(1.0);
+        }
+        .img-effect:hover {
+            transform: scale(1.03);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+        .title-shadow {
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Estilo para el contenedor principal para permitir el snap de scroll */
+        #presentation-container {
+            scroll-snap-type: y mandatory;
+            overflow-y: scroll;
+            height: 100vh;
+        }
+
+        /* Oculta las vistas financieras por defecto */
+        .financial-view {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            min-height: 100vh;
+            position: relative;
+        }
+        .financial-view.active {
+            display: flex;
+        }
+        .icon-taza {
+            width: 80px;
+            height: 80px;
+            fill: #3B5D3A;
+        }
+        
+        /* Estilos específicos para el Pizarrón de Corcho (G&T) */
+        .cork-board {
+            position: relative;
+            width: 90%;
+            max-width: 1000px;
+            height: 60vh;
+            /* Usando el moodboard como referencia para el fondo */
+            background-image: url('https://i.imgur.com/7k0JxAj.png');
+            background-size: cover;
+            background-position: center;
+            background-blend-mode: multiply;
+            background-color: rgba(245, 241, 231, 0.7); /* Beige claro semi-transparente */
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .cover-element {
+            position: absolute;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+            user-select: none;
+            background: #3B5D3A; /* Cubierta sólida para los elementos */
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            font-weight: bold;
+        }
+        .cover-element.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .revealed-image {
+            position: absolute;
+            border-radius: 0.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            width: 280px; 
+            height: 180px;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 0.7s ease;
+            border: 4px solid white;
+        }
+        .revealed-image.visible {
+            opacity: 1;
+        }
+
+        /* Estilo para el detalle orgánico de flor de café */
+        .coffee-flower-accent {
+            width: 30px;
+            height: 30px;
+            fill: #3B5D3A;
+        }
+        /* Clase para el texto sobre el fondo del moodboard */
+        .gnt-text-overlay {
+            color: #333333; /* Texto principal oscuro */
+            background: rgba(245, 241, 231, 0.75); /* Fondo claro para legibilidad */
+            padding: 1rem;
+            border-radius: 0.75rem;
+            max-width: 40%;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-fondo-claro text-texto-principal font-body">
+
+    <!-- Script de navegación y funcionalidad -->
+    <script>
+        // Función para cambiar la vista (Main Pitch, Juan Manuel, Marte)
+        function changeView(viewId) {
+            const mainSlides = document.getElementById('main-pitch-view');
+            const jmView = document.getElementById('juan-manuel-view');
+            const marteView = document.getElementById('marte-view');
+
+            // Desactiva todas
+            [jmView, marteView].forEach(v => v.classList.remove('active'));
+            mainSlides.style.display = 'none';
+
+            if (viewId === 'main-pitch') {
+                mainSlides.style.display = 'block';
+                document.getElementById('presentation-container').scrollTo(0, 0);
+            } else if (viewId === 'juan-manuel') {
+                jmView.classList.add('active');
+                document.getElementById('presentation-container').scrollTo(0, 0);
+            } else if (viewId === 'marte') {
+                marteView.classList.add('active');
+                document.getElementById('presentation-container').scrollTo(0, 0);
+            }
+        }
+
+        // Función para revelar las imágenes en el Pizarrón Interactivo
+        function revealImage(coverElement, imageElement) {
+            coverElement.classList.add('hidden');
+            imageElement.classList.add('visible');
+            coverElement.style.pointerEvents = 'none'; 
+        }
+
+        // Función para añadir los granos de café y flores (solo visual, no interactivo)
+        function generateCorkboardDecor() {
+            const board = document.getElementById('cork-board-target');
+            if (!board) return;
+
+            const boardWidth = board.offsetWidth;
+            const boardHeight = board.offsetHeight;
+            const decorTypes = ['☕', '🌸', '🌿', '📌']; 
+
+            for (let i = 0; i < 50; i++) {
+                const decor = document.createElement('div');
+                decor.textContent = decorTypes[Math.floor(Math.random() * decorTypes.length)];
+                decor.className = 'absolute text-xl opacity-70 select-none';
+                decor.style.left = `${Math.random() * 100}%`;
+                decor.style.top = `${Math.random() * 100}%`;
+                decor.style.transform = `translate(-50%, -50%) rotate(${Math.random() * 360}deg)`;
+                board.appendChild(decor);
+            }
+        }
+
+        // Componente SVG de Flor de Café (Para acento minimalista)
+        const CoffeeFlowerSVG = `
+            <svg class="coffee-flower-accent" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C10.74 2 9.55 2.5 8.7 3.35L3.35 8.7C2.5 9.55 2 10.74 2 12C2 13.26 2.5 14.45 3.35 15.3L8.7 20.65C9.55 21.5 10.74 22 12 22C13.26 22 14.45 21.5 15.3 20.65L20.65 15.3C21.5 14.45 22 13.26 22 12C22 10.74 21.5 9.55 20.65 8.7L15.3 3.35C14.45 2.5 13.26 2 12 2ZM12 4.17L17.83 10L12 15.83L6.17 10L12 4.17Z" fill="#3B5D3A"/>
+                <circle cx="12" cy="12" r="3" fill="#C96A3D"/>
+            </svg>
+        `;
+        
+        // Inyectar el SVG y la decoración al cargar la página
+        document.addEventListener('DOMContentLoaded', () => {
+            generateCorkboardDecor();
+
+            // Inyectar el SVG en la portada
+            const portada = document.getElementById('slide-1');
+            if(portada) {
+                const accentDiv = document.createElement('div');
+                accentDiv.innerHTML = CoffeeFlowerSVG;
+                accentDiv.classList.add('absolute', 'top-10', 'right-10');
+                portada.appendChild(accentDiv);
+            }
+
+            // Inyectar el SVG en Justificación Técnica
+            const tecnica = document.getElementById('slide-8').querySelector('.border-t');
+            if(tecnica) {
+                const accentDiv = document.createElement('div');
+                accentDiv.innerHTML = CoffeeFlowerSVG;
+                accentDiv.classList.add('mx-auto', 'mb-2');
+                tecnica.prepend(accentDiv);
+            }
+        });
+    </script>
+
+    <div id="presentation-container">
+        <!-- VISTA PRINCIPAL (Slides de 1 a 11) -->
+        <div id="main-pitch-view" style="display: block;">
+
+            <!-- Slide 1 – Portada -->
+            <section id="slide-1" class="slide flex flex-col items-center justify-center p-8 text-center bg-fondo-claro">
+                <div class="space-y-6">
+                    <!-- Icono de Taza de Café Minimalista (SVG) -->
+                    <svg class="icon-taza mx-auto mb-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 8H5C3.34315 8 2 9.34315 2 11V16C2 17.6569 3.34315 19 5 19H19C20.6569 19 22 17.6569 22 16V11C22 9.34315 20.6569 8 19 8Z" stroke="#3B5D3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M7 8V6C7 4.89543 7.89543 4 9 4H15C16.1046 4 17 4.89543 17 6V8" stroke="#3B5D3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+
+                    <h1 class="font-title font-extrabold text-5xl md:text-7xl leading-tight text-accent-verde title-shadow">
+                        Coffee Party – Propuesta esquemática y constructiva
+                    </h1>
+                    <h2 class="font-title font-bold text-2xl md:text-3xl text-accent-terracota max-w-2xl mx-auto">
+                        Diseño, experiencia y activación de marca
+                    </h2>
+                </div>
+                <p class="absolute bottom-10 text-lg font-light text-texto-principal/70">
+                    DKorando / Innovar con Alejandro
+                </p>
+            </section>
+            
+            <!-- Slide 2 – Pizarrón de Corcho INTERACTIVO (G&T) - STORYTELLING -->
+            <section id="slide-2-gyt" class="slide flex flex-col items-center justify-center p-8 md:p-16 space-y-8 bg-accent-verde/20">
+                <h2 class="font-title font-extrabold text-4xl text-accent-verde text-center">
+                    G&T: El Storytelling Detrás del Diseño (La Oportunidad)
+                </h2>
+                <p class="text-lg font-light leading-relaxed text-texto-principal/80 max-w-4xl text-center">
+                    **Problema:** Los "chavo-rucos" y la generación de 30-50 no tienen espacios para socializar temprano con buena música y sin alcohol, fuera del ambiente de "Bad Bunny".
+                </p>
+                <div id="cork-board-target" class="cork-board bg-accent-terracota/50">
+                    
+                    <!-- FOTO 1: Demografía Adulta (Chavo-rucos/Coffee Party) -->
+                    <img id="img-adulto" src="https://placehold.co/800x600/3B5D3A/FFFFFF?text=Demografía+30-50+Consciente" alt="Adultos socializando con café y música en horario temprano." class="revealed-image" style="top: 20%; right: 15%; width: 250px; height: 180px;">
+                    <div class="cover-element" style="top: 25%; right: 20%;" onclick="revealImage(this, document.getElementById('img-adulto'))">
+                        ☕ Público Objetivo
+                    </div>
+
+                    <!-- FOTO 2: Conexión Fútbol -->
+                    <img id="img-futbol" src="https://placehold.co/800x600/333333/FFFFFF?text=Fútbol+y+Comunidad" alt="Grupo de amigos viendo un partido de fútbol en un ambiente relajado." class="revealed-image" style="bottom: 15%; left: 15%; transform: rotate(-5deg); width: 280px; height: 160px;">
+                    <div class="cover-element" style="bottom: 20%; left: 20%;" onclick="revealImage(this, document.getElementById('img-futbol'))">
+                        ¡El factor fútbol!
+                    </div>
+
+                    <!-- FOTO 3: Pachón de Café (Como bebida social) -->
+                    <img id="img-pachon" src="https://placehold.co/800x600/C96A3D/FFFFFF?text=Pachón+de+Café" alt="Pachón de café de especialidad, alternativa a bebidas alcohólicas." class="revealed-image" style="top: 40%; left: 40%; width: 180px; height: 180px; transform: rotate(10deg);">
+                    <div class="cover-element" style="top: 45%; left: 45%;" onclick="revealImage(this, document.getElementById('img-pachon'))">
+                        🌺 Pachón Social
+                    </div>
+                    
+                    <!-- FOTO 4: Ambiente Temprano y Consciente -->
+                    <img id="img-ambiente" src="https://placehold.co/800x600/3B5D3A/FFFFFF?text=Ambiente+Consciente" alt="Gente socializando temprano en un evento." class="revealed-image" style="bottom: 20%; right: 30%; width: 220px; height: 150px; transform: rotate(-10deg);">
+                    <div class="cover-element" style="bottom: 25%; right: 35%;" onclick="revealImage(this, document.getElementById('img-ambiente'))">
+                        📌 Cero Resaca
+                    </div>
+
+                    <div class="gnt-text-overlay absolute top-10 left-10">
+                        <p class="font-title font-bold text-lg text-accent-terracota">El Ecosistema Social del Adulto</p>
+                        <p class="text-sm">Revelamos los elementos clave de la nueva cultura de ocio diurno y consciente.</p>
+                    </div>
+
+                </div>
+                <button onclick="document.getElementById('slide-3-moodboard').scrollIntoView({ behavior: 'smooth' });"
+                    class="mt-6 px-8 py-3 bg-accent-terracota text-fondo-claro font-title font-bold text-lg rounded-xl shadow-lg hover:shadow-xl hover:bg-accent-terracota/90 transition duration-300 transform hover:scale-105">
+                    Ver Solución de Diseño
+                </button>
+            </section>
+
+            <!-- Slide 3 – Moodboard de Materialidad y Textura -->
+            <section id="slide-3-moodboard" class="slide flex flex-col md:flex-row-reverse items-center justify-center p-8 md:p-16 space-y-8 md:space-y-0 md:space-x-12 md:space-x-reverse bg-fondo-claro">
+                <div class="md:w-1/2 max-w-lg">
+                    <img src="https://i.imgur.com/7k0JxAj.png" alt="Moodboard de materiales y texturas orgánicas." class="w-full h-auto rounded-xl shadow-2xl img-effect border-4 border-accent-terracota/50">
+                    <p class="mt-4 text-center text-sm italic text-texto-principal/80">Palma, piedra, madera y acentos de terracota.</p>
+                </div>
+                <div class="md:w-1/2 max-w-xl space-y-4">
+                    <h2 class="font-title font-extrabold text-4xl text-accent-verde">Solución: Identidad Orgánica</h2>
+                    <p class="text-lg font-light leading-relaxed">
+                        El diseño se basa en una **materialidad honesta** que celebra la conexión con la tierra y el origen del café. Esta paleta asegura una experiencia sensorial auténtica y *premium*, ideal para el público objetivo.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Slide 4 – Vista diurna -->
+            <section id="slide-4" class="slide flex flex-col md:flex-row items-center justify-center p-8 md:p-16 space-y-8 md:space-y-0 md:space-x-12 bg-fondo-claro">
+                <div class="md:w-1/2 max-w-lg">
+                    <img src="https://i.imgur.com/PyMuQRc.jpeg" alt="Render de vista diurna del kiosco de café." class="w-full h-auto rounded-xl shadow-2xl img-effect">
+                    <p class="mt-4 text-center text-sm italic text-texto-principal/80">Cada saco cuenta una historia.</p>
+                </div>
+                <div class="md:w-1/2 max-w-xl space-y-4">
+                    <h2 class="font-title font-extrabold text-4xl text-accent-verde">Materialidad en Uso</h2>
+                    <p class="text-lg font-light leading-relaxed">
+                        La vista diurna revela los **materiales auténticos**: palma, madera, costales y piedra. Cada elemento transmite origen y sostenibilidad, creando un punto de venta con carácter y arraigo.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Slide 5 – Vista combinada -->
+            <section id="slide-5" class="slide flex flex-col md:flex-row-reverse items-center justify-center p-8 md:p-16 space-y-8 md:space-y-0 md:space-x-12 md:space-x-reverse bg-fondo-claro">
+                <div class="md:w-1/2 max-w-lg">
+                    <img src="https://i.imgur.com/mPX2iNd.jpeg" alt="Render de vista combinada del kiosco, mostrando detalles estructurales y de marca." class="w-full h-auto rounded-xl shadow-2xl img-effect">
+                    <p class="mt-4 text-center text-sm italic text-texto-principal/80">Diseño que conecta con la tierra y la marca.</p>
+                </div>
+                <div class="md:w-1/2 max-w-xl space-y-4">
+                    <h2 class="font-title font-extrabold text-4xl text-accent-terracota">Narrativa visual integrada</h2>
+                    <p class="text-lg font-light leading-relaxed">
+                        Esta vista muestra cómo se combinan los elementos técnicos y emocionales: la **estructura robusta**, el **branding** sutil y la **experiencia** que anticipa el consumidor.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Slide 6 – Render nocturno -->
+            <section id="slide-6" class="slide flex flex-col md:flex-row items-center justify-center p-8 md:p-16 space-y-8 md:space-y-0 md:space-x-12 bg-fondo-claro">
+                <div class="md:w-1/2 max-w-lg">
+                    <img src="https://i.imgur.com/zMT6kre.jpeg" alt="Render nocturno del kiosco, con iluminación cálida." class="w-full h-auto rounded-xl shadow-2xl img-effect">
+                    <p class="mt-4 text-center text-sm italic text-texto-principal/80">Luz cálida, música y café en movimiento.</p>
+                </div>
+                <div class="md:w-1/2 max-w-xl space-y-4">
+                    <h2 class="font-title font-extrabold text-4xl text-accent-verde">La experiencia cobra vida</h2>
+                    <p class="text-lg font-light leading-relaxed">
+                        La **iluminación cálida** y la atmósfera social transforman el espacio en un punto de encuentro vibrante y memorable. El diseño no termina con el sol, sino que se activa con la noche.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Slide 7 – Plano constructivo (ACTUALIZADO) -->
+            <section id="slide-7" class="slide flex flex-col items-center justify-center p-8 md:p-16 space-y-6 bg-fondo-claro">
+                <h2 class="font-title font-extrabold text-4xl text-accent-terracota text-center">Plano constructivo más reciente</h2>
+                <div class="md:w-3/4 max-w-4xl">
+                    <!-- URL del nuevo plano constructivo -->
+                    <img src="https://i.imgur.com/8F01qQh.png" alt="Plano constructivo esquemático actualizado." class="w-full h-auto rounded-xl border-4 border-accent-terracota/50 shadow-xl img-effect">
+                    <p class="mt-4 text-center text-sm italic text-texto-principal/80">Diseño defendible con valor técnico.</p>
+                </div>
+                <p class="text-lg font-light leading-relaxed max-w-3xl text-center mt-4">
+                    Este plano final presenta las medidas estimadas, estructura portante y distribución operativa. Sirve como base para **ejecución técnica** y presupuestos de construcción.
+                </p>
+            </section>
+
+            <!-- Slide 8 – Distribución esquemática y Uniforme -->
+            <section id="slide-8" class="slide flex flex-col items-center justify-center p-8 md:p-16 space-y-8 bg-fondo-claro">
+                <h2 class="font-title font-extrabold text-4xl text-accent-verde text-center">Distribución, Flujo y Equipo (Branding Operativo)</h2>
+                <div class="flex flex-col md:flex-row gap-6 max-w-5xl w-full">
+                    <div class="md:w-2/3">
+                        <img src="https://i.imgur.com/e66cwc5.png" alt="Plano de distribución esquemática." class="w-full h-auto rounded-xl border-4 border-accent-verde/50 shadow-xl img-effect">
+                        <p class="mt-4 text-center text-sm italic text-texto-principal/80">Activación circular con foco en experiencia y flujo.</p>
+                    </div>
+                    <div class="md:w-1/3 p-4 bg-accent-verde/10 rounded-xl shadow-lg">
+                        <h3 class="font-title font-bold text-xl text-accent-terracota mb-3">Identidad del Equipo</h3>
+                        <img src="https://i.imgur.com/8OPzBUP.jpeg" alt="Diseño de uniformes para Coffee Party, inspirados en el café." class="w-full h-auto rounded-lg border border-gray-300 shadow-md">
+                        <p class="mt-2 text-sm font-light text-texto-principal/80">
+                            El uniforme refuerza la narrativa de la tierra, conectando al personal con la autenticidad del café.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 9 – Justificación técnica -->
+            <section id="slide-9" class="slide flex flex-col items-center justify-center p-8 md:p-16 space-y-8 bg-accent-verde/10">
+                <h2 class="font-title font-extrabold text-4xl text-accent-verde text-center">Medidas y recomendaciones operativas</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl text-lg">
+                    <div class="p-4 bg-fondo-claro rounded-xl shadow-lg border-l-4 border-accent-verde">
+                        <p class="font-bold text-accent-terracota">Altura mostrador:</p><p>1.10 m</p>
+                    </div>
+                    <div class="p-4 bg-fondo-claro rounded-xl shadow-lg border-l-4 border-accent-verde">
+                        <p class="font-bold text-accent-terracota">Diámetro plataforma:</p><p>18.00 m</p>
+                    </div>
+                    <div class="p-4 bg-fondo-claro rounded-xl shadow-lg border-l-4 border-accent-verde">
+                        <p class="font-bold text-accent-terracota">Materialidad:</p><p>Tubo metálico, madera tratada, palma natural.</p>
+                    </div>
+                </div>
+                <p id="tecnica-pie" class="pt-8 text-center text-lg italic text-texto-principal/70 border-t border-accent-verde/30 w-full max-w-lg">
+                    Diseño funcional, adaptable y listo para ejecución. **Incluye pantallas digitales para menú y publicidad.**
+                </p>
+            </section>
+
+            <!-- Slide 10 – Cierre y Botones de Financiamiento -->
+            <section id="slide-10-cierre" class="slide flex flex-col items-center justify-center p-8 text-center bg-accent-terracota text-fondo-claro space-y-10">
+                <h2 class="font-title font-extrabold text-5xl md:text-6xl">
+                    Próximo Paso: Viabilidad Financiera
+                </h2>
+                <p class="text-xl font-light leading-relaxed max-w-3xl">
+                    La inversión está justificada por la narrativa de marca, la viabilidad técnica y los nuevos requerimientos (Pantallas). Selecciona la estructura de costos:
+                </p>
+                
+                <div class="flex flex-col md:flex-row gap-8 justify-center">
+                    <!-- Botón para Juan Manuel (Estructura de Cobro y Alianza) -->
+                    <button onclick="changeView('juan-manuel')"
+                        class="px-8 py-4 bg-accent-verde text-fondo-claro font-title font-bold text-lg rounded-xl shadow-lg hover:shadow-xl hover:bg-accent-verde/90 transition duration-300 transform hover:-translate-y-1">
+                        💸 Vista Interna (Alianza Juan Manuel)
+                    </button>
+                    
+                    <!-- Botón para Marte (Venta de Inversión) -->
+                    <button onclick="changeView('marte')"
+                        class="px-8 py-4 bg-fondo-claro text-accent-terracota font-title font-bold text-lg rounded-xl shadow-lg hover:shadow-xl hover:bg-white transition duration-300 transform hover:-translate-y-1">
+                        💼 Vista Ejecutiva (Inversión Marte)
+                    </button>
+                </div>
+            </section>
+        </div>
+        
+        <!-- VISTA FINANCIERA JUAN MANUEL (INTERNA) -->
+        <div id="juan-manuel-view" class="financial-view bg-fondo-claro">
+            <button onclick="changeView('main-pitch')" class="absolute top-4 left-4 px-4 py-2 bg-texto-principal text-fondo-claro rounded-full text-sm font-bold shadow-md hover:bg-texto-principal/80 z-10">
+                ← Volver a Presentación
+            </button>
+
+            <!-- Slide JM 1 – Cobro de Diseño (Tu Estrategia de Alianza) -->
+            <section class="slide-content flex flex-col items-center justify-center p-8 md:p-16 space-y-8 bg-accent-verde text-fondo-claro w-full min-h-screen">
+                <h2 class="font-title font-extrabold text-4xl text-fondo-claro text-center max-w-2xl title-shadow">
+                    Inversión en la Fase I: Construyendo la Alianza
+                </h2>
+                <div class="bg-fondo-claro text-texto-principal p-8 rounded-xl shadow-2xl w-full max-w-2xl space-y-6">
+                    <p class="text-lg font-normal">
+                        Este costo refleja una inversión estratégica para **abrir la puerta** a una colaboración a largo plazo contigo, enfocándonos en la ejecución futura.
+                    </p>
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-accent-terracota">
+                                <th class="py-2 text-accent-verde font-title font-bold">Concepto</th>
+                                <th class="py-2 text-accent-verde font-title font-bold text-right">Valor (USD)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-2">Diseño conceptual, Renders y Moodboard</td>
+                                <td class="py-2 text-right">$ 750</td>
+                            </tr>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-2">Plano Esquemático y Distribución Operativa</td>
+                                <td class="py-2 text-right">$ 625</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr class="bg-accent-verde/10">
+                                <td class="py-3 font-title font-extrabold text-xl text-accent-terracota">TOTAL FASE I (Diseño y Documentación)</td>
+                                <td class="py-3 font-title font-extrabold text-xl text-right text-accent-terracota">$ 1,375</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    <p class="text-sm italic pt-2">
+                        *El valor de mercado de esta fase es considerablemente mayor. Esto es una inversión en nuestra sociedad.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Slide JM 2 – Costo Constructivo (Juan Manuel - Desglose con Margen) -->
+            <section class="slide-content flex flex-col items-center justify-center p-8 md:p-16 space-y-8 bg-accent-terracota/10 w-full min-h-screen">
+                <h2 class="font-title font-extrabold text-4xl text-accent-terracota text-center max-w-2xl title-shadow">
+                    Estimación de Ejecución y Ganancia ICA (Interna)
+                </h2>
+                <div class="bg-fondo-claro p-8 rounded-xl shadow-2xl w-full max-w-3xl space-y-4">
+                    <p class="font-bold text-lg text-accent-verde border-b pb-2">RUBROS BASE (CONSTRUCCIÓN Y ACTIVACIÓN)</p>
+                    <table class="w-full text-left border-collapse">
+                        <tbody>
+                            <tr class="border-b border-gray-100"><td class="py-1">Construcción, Mobiliario e Instalaciones</td><td class="py-1 text-right">$ 8,500</td></tr>
+                            <tr class="border-b border-gray-100"><td class="py-1">Activaciones (Pachones, Branding, Uniformes, etc.)</td><td class="py-1 text-right">$ 2,250</td></tr>
+                            <tr class="border-b border-gray-100"><td class="py-1 text-accent-terracota font-semibold">Pantallas Digitales (Menús) y Montaje</td><td class="py-1 text-right">$ 2,000</td></tr>
+                            <tr class="font-bold"><td class="py-2">Subtotal Base (CD)</td><td class="py-2 text-right text-accent-verde">$ 12,750.00</td></tr>
+                        </tbody>
+                    </table>
+
+                    <p class="font-bold text-lg text-accent-terracota border-b pb-2 pt-4">GESTIÓN DE PROYECTO Y RIESGO</p>
+                    <table class="w-full text-left border-collapse">
+                        <tbody>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-1">Reserva para Imprevistos (7% del CD)</td>
+                                <td class="py-1 text-right">$ 892.50</td>
+                                <td class="py-1 text-xs text-right italic text-texto-principal/70">Colchón por eventualidades</td>
+                            </tr>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-1">**Margen/Honorarios ICA (20% del CD)**</td>
+                                <td class="py-1 text-right">$ 2,550.00</td>
+                                <td class="py-1 text-xs text-right italic text-texto-principal/70">Tu ganancia por supervisión y coordinación</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="flex justify-between font-title font-extrabold text-2xl text-accent-verde pt-4 border-t border-accent-verde/30">
+                        <span>TOTAL PROYECTO ESTIMADO (Incl. Gcia/Imprev.)</span>
+                        <span>$ 16,192.50</span>
+                    </div>
+                </div>
+                <p class="text-lg italic pt-4 max-w-xl text-center">
+                    **Análisis ICA:** Este costo es favorable, realista e incluye un 20% de ganancia de supervisión y una reserva del 7% para imprevistos.
+                </p>
+            </section>
+        </div>
+
+        <!-- VISTA FINANCIERA MARTE (EJECUTIVA) -->
+        <div id="marte-view" class="financial-view bg-fondo-claro">
+            <button onclick="changeView('main-pitch')" class="absolute top-4 left-4 px-4 py-2 bg-texto-principal text-fondo-claro rounded-full text-sm font-bold shadow-md hover:bg-texto-principal/80 z-10">
+                ← Volver a Presentación
+            </button>
+
+            <!-- Slide Marte 1 – Inversión Total (Narrativa de Valor) -->
+            <section class="slide-content flex flex-col items-center justify-center p-8 md:p-16 space-y-8 bg-accent-verde text-fondo-claro w-full min-h-screen">
+                <h2 class="font-title font-extrabold text-4xl text-fondo-claro text-center max-w-2xl title-shadow">
+                    Inversión Total del Proyecto (Venta de Experiencia)
+                </h2>
+                <div class="bg-fondo-claro text-texto-principal p-8 rounded-xl shadow-2xl w-full max-w-2xl space-y-6">
+                    <p class="text-lg font-normal font-bold text-accent-terracota">
+                        Esta inversión activa una experiencia cultural y conecta con un mercado de alto valor (30-50 años), incluyendo la tecnología digital.
+                    </p>
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-accent-terracota">
+                                <th class="py-2 text-accent-verde font-title font-bold">Rubro</th>
+                                <th class="py-2 text-accent-verde font-title font-bold text-right">Rango Estimado (USD)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-2">Construcción del Módulo (Bar, Estructura, Materiales)</td>
+                                <td class="py-2 text-right">$ 3,500 – $ 5,000</td>
+                            </tr>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-2">Mobiliario, Iluminación y Ambientación (Activación)</td>
+                                <td class="py-2 text-right">$ 2,000 – $ 3,000</td>
+                            </tr>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-2 text-accent-terracota font-semibold">Tecnología (Pantallas Digitales y Montaje)</td>
+                                <td class="py-2 text-right text-accent-terracota font-semibold">$ 2,000 – $ 3,000</td>
+                            </tr>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-2">Kiosco Pachones, Uniformes y Branding</td>
+                                <td class="py-2 text-right">$ 1,500 – $ 2,500</td>
+                            </tr>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-2 text-accent-terracota font-bold">Gestión Integral, Supervisión y 7% Imprevistos</td>
+                                <td class="py-2 text-right text-accent-terracota font-bold">$ 3,000 – $ 6,650</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr class="bg-accent-verde/10">
+                                <td class="py-3 font-title font-extrabold text-xl text-fondo-claro">TOTAL INVERSIÓN (Propuesta Integral)</td>
+                                <td class="py-3 font-title font-extrabold text-xl text-right text-fondo-claro">$ 12,000 – $ 20,150</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    <p class="text-sm italic pt-2">
+                        *El rango incluye todos los costos de ejecución, tecnología, gestión de riesgo (imprevistos) y honorarios de coordinación.
+                    </p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+</body>
+</html>
