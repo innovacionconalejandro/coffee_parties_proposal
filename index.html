@@ -18,7 +18,7 @@
                         'accent-verde': '#3B5D3A',
                         'accent-terracota': '#C96A3D',
                         'texto-principal': '#333333',
-                        'bg-suave': '#EAECE6', /* Nuevo color suave (Salvia/Menta tenue) */
+                        'bg-suave': '#EAECE6', 
                     },
                     fontFamily: {
                         'title': ['Geologica', 'Montserrat', 'sans-serif'],
@@ -49,16 +49,18 @@
             user-select: none;          /* Standard */
         }
         
-        .img-effect {
+        /* Estilos del Canvas que reemplaza a IMG */
+        .secure-image {
+            width: 100%;
+            height: auto;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
             transition: transform 0.5s ease-out, box-shadow 0.5s ease-out;
             transform: scale(1.0);
         }
-        .img-effect:hover {
+        .secure-image-container:hover .secure-image {
             transform: scale(1.03);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-        }
-        .title-shadow {
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         /* Estilo para el contenedor principal para permitir el snap de scroll */
@@ -72,7 +74,6 @@
         body {
             background-color: var(--tw-colors-bg-suave) !important;
         }
-
 
         /* Oculta las vistas financieras por defecto */
         .financial-view {
@@ -97,12 +98,11 @@
             width: 90%;
             max-width: 1000px;
             height: 60vh;
-            /* Usando el moodboard como referencia para el fondo */
             background-image: url('https://i.imgur.com/7k0JxAj.png');
             background-size: cover;
             background-position: center;
             background-blend-mode: multiply;
-            background-color: rgba(245, 241, 231, 0.7); /* Beige claro semi-transparente */
+            background-color: rgba(245, 241, 231, 0.7); 
             border-radius: 1rem;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
             overflow: hidden;
@@ -115,7 +115,7 @@
             cursor: pointer;
             transition: opacity 0.3s ease;
             user-select: none;
-            background: #3B5D3A; /* Cubierta sólida para los elementos */
+            background: #3B5D3A; 
             color: white;
             padding: 0.5rem 1rem;
             border-radius: 9999px;
@@ -140,26 +140,19 @@
         .revealed-image.visible {
             opacity: 1;
         }
-
-        /* Estilo para el detalle orgánico de flor de café */
-        .coffee-flower-accent {
-            width: 30px;
-            height: 30px;
-            fill: #3B5D3A;
-        }
-        /* Clase para el texto sobre el fondo del moodboard */
         .gnt-text-overlay {
-            color: #333333; /* Texto principal oscuro */
-            background: rgba(245, 241, 231, 0.75); /* Fondo claro para legibilidad */
+            color: #333333; 
+            background: rgba(245, 241, 231, 0.75); 
             padding: 1rem;
             border-radius: 0.75rem;
             max-width: 40%;
             text-align: center;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
+        
     </style>
 </head>
-<!-- Bloqueo de Clic Derecho y Selección de Texto -->
+<!-- Bloqueo de Clic Derecho, Selección de Texto y Atajos de Copia/Guardado -->
 <body class="bg-bg-suave text-texto-principal font-body" 
       oncontextmenu="return false;" 
       onselectstart="return false;">
@@ -169,25 +162,29 @@
         document.onkeydown = function(e) {
             // Deshabilita F12, Ctrl+Shift+I (Inspeccionar)
             if (e.key === "F12" || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+                e.preventDefault();
                 return false;
             }
             // Deshabilita Ctrl+Shift+J (Consola)
             if (e.ctrlKey && e.shiftKey && e.key === 'J') {
+                e.preventDefault();
                 return false;
             }
             // Deshabilita Ctrl+S (Guardar)
             if (e.ctrlKey && e.key === 'S') {
+                e.preventDefault();
                 return false;
             }
             // Deshabilita Ctrl+U (Ver Fuente)
             if (e.ctrlKey && e.key === 'U') {
+                e.preventDefault();
                 return false;
             }
         };
     </script>
 
 
-    <!-- Script de navegación y funcionalidad -->
+    <!-- Script de navegación, funcionalidad y Watermark -->
     <script>
         // Función para cambiar la vista (Main Pitch, Juan Manuel, Marte)
         function changeView(viewId) {
@@ -223,8 +220,6 @@
             const board = document.getElementById('cork-board-target');
             if (!board) return;
 
-            const boardWidth = board.offsetWidth;
-            const boardHeight = board.offsetHeight;
             const decorTypes = ['☕', '🌸', '🌿', '📌']; 
 
             for (let i = 0; i < 50; i++) {
@@ -237,7 +232,7 @@
                 board.appendChild(decor);
             }
         }
-
+        
         // Componente SVG de Flor de Café (Para acento minimalista)
         const CoffeeFlowerSVG = `
             <svg class="coffee-flower-accent" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -246,20 +241,67 @@
             </svg>
         `;
         
+        // **FUNCIÓN CLAVE: DIBUJAR IMAGEN Y WATERMARK EN CANVAS**
+        function drawImageWithWatermark(canvasId, imageUrl, watermarkText, fontSize, rotation) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            img.crossOrigin = "Anonymous"; // Necesario para cargar imágenes externas
+
+            img.onload = function() {
+                canvas.width = img.width;
+                canvas.height = img.height;
+                
+                // 1. Dibujar la imagen original
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                // 2. Configurar el Watermark
+                ctx.globalAlpha = 0.15; // 15% de opacidad
+                ctx.fillStyle = '#3B5D3A'; // Verde Café
+                ctx.font = `${fontSize}px Montserrat`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                // 3. Dibujar texto repetitivo y rotado
+                ctx.save();
+                ctx.translate(canvas.width / 2, canvas.height / 2);
+                ctx.rotate(rotation * Math.PI / 180);
+                
+                // Patrón de repetición (adaptado al tamaño del canvas)
+                const step = 300; 
+                const numX = Math.ceil(canvas.width / step) * 2;
+                const numY = Math.ceil(canvas.height / step) * 2;
+
+                for (let i = -numX; i < numX; i++) {
+                    for (let j = -numY; j < numY; j++) {
+                        ctx.fillText(watermarkText, i * step, j * step);
+                    }
+                }
+                
+                ctx.restore();
+                ctx.globalAlpha = 1.0; // Resetear la opacidad
+            };
+            img.src = imageUrl;
+        }
+
+
         // Inyectar el SVG y la decoración al cargar la página
         document.addEventListener('DOMContentLoaded', () => {
             generateCorkboardDecor();
 
-            // Inyectar el SVG en la portada
-            const portada = document.getElementById('slide-1');
-            if(portada) {
-                const accentDiv = document.createElement('div');
-                accentDiv.innerHTML = CoffeeFlowerSVG;
-                accentDiv.classList.add('absolute', 'top-10', 'right-10');
-                portada.appendChild(accentDiv);
-            }
-
-            // Inyectar el SVG en Justificación Técnica
+            // Inyectar el SVG en la portada y Justificación Técnica
+            const injectSVG = (id, className) => {
+                const target = document.getElementById(id);
+                if (target) {
+                    const accentDiv = document.createElement('div');
+                    accentDiv.innerHTML = CoffeeFlowerSVG;
+                    accentDiv.classList.add(...className.split(' '));
+                    target.appendChild(accentDiv);
+                }
+            };
+            
+            injectSVG('slide-1', 'absolute top-10 right-10');
+            
             const tecnica = document.getElementById('slide-9').querySelector('.border-t');
             if(tecnica) {
                 const accentDiv = document.createElement('div');
@@ -267,6 +309,31 @@
                 accentDiv.classList.add('mx-auto', 'mb-2');
                 tecnica.prepend(accentDiv);
             }
+            
+            // DIBUJAR TODAS LAS IMÁGENES CON MARCA DE AGUA (PIXEL BLINDING)
+            const watermarkText = "PI Innovar con Alejandro";
+            
+            // Slide 3: Moodboard
+            drawImageWithWatermark('canvas-moodboard', 'https://i.imgur.com/7k0JxAj.png', watermarkText, 50, -30);
+            
+            // Slide 4: Vista diurna
+            drawImageWithWatermark('canvas-diurna', 'https://i.imgur.com/PyMuQRc.jpeg', watermarkText, 40, -45);
+            
+            // Slide 5: Vista combinada
+            drawImageWithWatermark('canvas-combinada', 'https://i.imgur.com/mPX2iNd.jpeg', watermarkText, 40, 45);
+            
+            // Slide 6: Render nocturno
+            drawImageWithWatermark('canvas-nocturno', 'https://i.imgur.com/zMT6kre.jpeg', watermarkText, 40, -45);
+
+            // Slide 7: Plano constructivo
+            drawImageWithWatermark('canvas-plano', 'https://i.imgur.com/8F01qQh.png', watermarkText, 40, -10);
+
+            // Slide 8: Distribución esquemática
+            drawImageWithWatermark('canvas-distribucion', 'https://i.imgur.com/e66cwc5.png', watermarkText, 40, 10);
+            
+            // Slide 8: Uniforme
+            drawImageWithWatermark('canvas-uniforme', 'https://i.imgur.com/8OPzBUP.jpeg', watermarkText, 25, 20);
+            
         });
     </script>
 
@@ -344,8 +411,9 @@
 
             <!-- Slide 3 – Moodboard de Materialidad y Textura -->
             <section id="slide-3-moodboard" class="slide flex flex-col md:flex-row-reverse items-center justify-center p-8 md:p-16 space-y-8 md:space-y-0 md:space-x-12 md:space-x-reverse bg-bg-suave">
-                <div class="md:w-1/2 max-w-lg">
-                    <img src="https://i.imgur.com/7k0JxAj.png" alt="Moodboard de materiales y texturas orgánicas." class="w-full h-auto rounded-xl shadow-2xl img-effect border-4 border-accent-terracota/50">
+                <div class="md:w-1/2 max-w-lg secure-image-container">
+                    <!-- Canvas reemplaza IMG -->
+                    <canvas id="canvas-moodboard" class="secure-image" alt="Moodboard de materiales y texturas orgánicas."></canvas>
                     <p class="mt-4 text-center text-sm italic text-texto-principal/80">Palma, piedra, madera y acentos de terracota.</p>
                 </div>
                 <div class="md:w-1/2 max-w-xl space-y-4">
@@ -358,8 +426,9 @@
 
             <!-- Slide 4 – Vista diurna -->
             <section id="slide-4" class="slide flex flex-col md:flex-row items-center justify-center p-8 md:p-16 space-y-8 md:space-y-0 md:space-x-12 bg-bg-suave">
-                <div class="md:w-1/2 max-w-lg">
-                    <img src="https://i.imgur.com/PyMuQRc.jpeg" alt="Render de vista diurna del kiosco de café." class="w-full h-auto rounded-xl shadow-2xl img-effect">
+                <div class="md:w-1/2 max-w-lg secure-image-container">
+                    <!-- Canvas reemplaza IMG -->
+                    <canvas id="canvas-diurna" class="secure-image" alt="Render de vista diurna del kiosco de café."></canvas>
                     <p class="mt-4 text-center text-sm italic text-texto-principal/80">Cada saco cuenta una historia.</p>
                 </div>
                 <div class="md:w-1/2 max-w-xl space-y-4">
@@ -372,8 +441,9 @@
 
             <!-- Slide 5 – Vista combinada -->
             <section id="slide-5" class="slide flex flex-col md:flex-row-reverse items-center justify-center p-8 md:p-16 space-y-8 md:space-y-0 md:space-x-12 md:space-x-reverse bg-bg-suave">
-                <div class="md:w-1/2 max-w-lg">
-                    <img src="https://i.imgur.com/mPX2iNd.jpeg" alt="Render de vista combinada del kiosco, mostrando detalles estructurales y de marca." class="w-full h-auto rounded-xl shadow-2xl img-effect">
+                <div class="md:w-1/2 max-w-lg secure-image-container">
+                    <!-- Canvas reemplaza IMG -->
+                    <canvas id="canvas-combinada" class="secure-image" alt="Render de vista combinada del kiosco, mostrando detalles estructurales y de marca."></canvas>
                     <p class="mt-4 text-center text-sm italic text-texto-principal/80">Diseño que conecta con la tierra y la marca.</p>
                 </div>
                 <div class="md:w-1/2 max-w-xl space-y-4">
@@ -386,8 +456,9 @@
 
             <!-- Slide 6 – Render nocturno -->
             <section id="slide-6" class="slide flex flex-col md:flex-row items-center justify-center p-8 md:p-16 space-y-8 md:space-y-0 md:space-x-12 bg-bg-suave">
-                <div class="md:w-1/2 max-w-lg">
-                    <img src="https://i.imgur.com/zMT6kre.jpeg" alt="Render nocturno del kiosco, con iluminación cálida." class="w-full h-auto rounded-xl shadow-2xl img-effect">
+                <div class="md:w-1/2 max-w-lg secure-image-container">
+                    <!-- Canvas reemplaza IMG -->
+                    <canvas id="canvas-nocturno" class="secure-image" alt="Render nocturno del kiosco, con iluminación cálida."></canvas>
                     <p class="mt-4 text-center text-sm italic text-texto-principal/80">Luz cálida, música y café en movimiento.</p>
                 </div>
                 <div class="md:w-1/2 max-w-xl space-y-4">
@@ -401,9 +472,9 @@
             <!-- Slide 7 – Plano constructivo (ACTUALIZADO) -->
             <section id="slide-7" class="slide flex flex-col items-center justify-center p-8 md:p-16 space-y-6 bg-bg-suave">
                 <h2 class="font-title font-extrabold text-4xl text-accent-terracota text-center">Plano constructivo más reciente</h2>
-                <div class="md:w-3/4 max-w-4xl">
-                    <!-- URL del nuevo plano constructivo -->
-                    <img src="https://i.imgur.com/8F01qQh.png" alt="Plano constructivo esquemático actualizado." class="w-full h-auto rounded-xl border-4 border-accent-terracota/50 shadow-xl img-effect">
+                <div class="md:w-3/4 max-w-4xl secure-image-container border-4 border-accent-terracota/50">
+                    <!-- Canvas reemplaza IMG -->
+                    <canvas id="canvas-plano" class="secure-image" alt="Plano constructivo esquemático actualizado."></canvas>
                     <p class="mt-4 text-center text-sm italic text-texto-principal/80">Diseño defendible con valor técnico.</p>
                 </div>
                 <p class="text-lg font-light leading-relaxed max-w-3xl text-center mt-4">
@@ -415,13 +486,17 @@
             <section id="slide-8" class="slide flex flex-col items-center justify-center p-8 md:p-16 space-y-8 bg-bg-suave">
                 <h2 class="font-title font-extrabold text-4xl text-accent-verde text-center">Distribución, Flujo y Equipo (Branding Operativo)</h2>
                 <div class="flex flex-col md:flex-row gap-6 max-w-5xl w-full">
-                    <div class="md:w-2/3">
-                        <img src="https://i.imgur.com/e66cwc5.png" alt="Plano de distribución esquemática." class="w-full h-auto rounded-xl border-4 border-accent-verde/50 shadow-xl img-effect">
+                    <div class="md:w-2/3 secure-image-container border-4 border-accent-verde/50">
+                        <!-- Canvas reemplaza IMG -->
+                        <canvas id="canvas-distribucion" class="secure-image" alt="Plano de distribución esquemática."></canvas>
                         <p class="mt-4 text-center text-sm italic text-texto-principal/80">Activación circular con foco en experiencia y flujo.</p>
                     </div>
                     <div class="md:w-1/3 p-4 bg-accent-verde/10 rounded-xl shadow-lg">
                         <h3 class="font-title font-bold text-xl text-accent-terracota mb-3">Identidad del Equipo</h3>
-                        <img src="https://i.imgur.com/8OPzBUP.jpeg" alt="Diseño de uniformes para Coffee Party, inspirados en el café." class="w-full h-auto rounded-lg border border-gray-300 shadow-md">
+                        <div class="secure-image-container rounded-lg border border-gray-300 shadow-md">
+                            <!-- Canvas reemplaza IMG -->
+                            <canvas id="canvas-uniforme" class="secure-image" alt="Diseño de uniformes para Coffee Party, inspirados en el café."></canvas>
+                        </div>
                         <p class="mt-2 text-sm font-light text-texto-principal/80">
                             El uniforme refuerza la narrativa de la tierra, conectando al personal con la autenticidad del café.
                         </p>
@@ -471,7 +546,8 @@
                     </button>
                 </div>
 
-                <p class="absolute bottom-4 text-xs font-light text-fondo-claro/70">
+                <p class="absolute bottom-4 text-xs font-light text-fondo-claro/70 text-center">
+                    <span class="font-bold">Elaborado por Ing. Alejandro Ortega - Septiembre 2025</span><br>
                     <span class="font-bold">© 2025 DKorando / Innovar con Alejandro.</span> Derechos Reservados. Propiedad Intelectual Estratégica.
                 </p>
             </section>
