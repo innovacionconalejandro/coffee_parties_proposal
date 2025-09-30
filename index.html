@@ -18,6 +18,7 @@
                         'accent-verde': '#3B5D3A',
                         'accent-terracota': '#C96A3D',
                         'texto-principal': '#333333',
+                        'bg-suave': '#EAECE6', /* Nuevo color suave (Salvia/Menta tenue) */
                     },
                     fontFamily: {
                         'title': ['Geologica', 'Montserrat', 'sans-serif'],
@@ -40,6 +41,14 @@
             scroll-snap-align: start; 
         }
         
+        /* Bloqueo de selección de texto */
+        body {
+            -webkit-user-select: none;  /* Safari */
+            -moz-user-select: none;     /* Firefox */
+            -ms-user-select: none;      /* IE10+ */
+            user-select: none;          /* Standard */
+        }
+        
         .img-effect {
             transition: transform 0.5s ease-out, box-shadow 0.5s ease-out;
             transform: scale(1.0);
@@ -58,6 +67,12 @@
             overflow-y: scroll;
             height: 100vh;
         }
+        
+        /* Aplica el verde suave al cuerpo y a la portada */
+        body {
+            background-color: var(--tw-colors-bg-suave) !important;
+        }
+
 
         /* Oculta las vistas financieras por defecto */
         .financial-view {
@@ -144,7 +159,33 @@
         }
     </style>
 </head>
-<body class="bg-fondo-claro text-texto-principal font-body">
+<!-- Bloqueo de Clic Derecho y Selección de Texto -->
+<body class="bg-bg-suave text-texto-principal font-body" 
+      oncontextmenu="return false;" 
+      onselectstart="return false;">
+
+    <!-- Script para bloquear atajos de teclado (Ctrl+C, Ctrl+S, Ctrl+U, F12) -->
+    <script>
+        document.onkeydown = function(e) {
+            // Deshabilita F12, Ctrl+Shift+I (Inspeccionar)
+            if (e.key === "F12" || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+                return false;
+            }
+            // Deshabilita Ctrl+Shift+J (Consola)
+            if (e.ctrlKey && e.shiftKey && e.key === 'J') {
+                return false;
+            }
+            // Deshabilita Ctrl+S (Guardar)
+            if (e.ctrlKey && e.key === 'S') {
+                return false;
+            }
+            // Deshabilita Ctrl+U (Ver Fuente)
+            if (e.ctrlKey && e.key === 'U') {
+                return false;
+            }
+        };
+    </script>
+
 
     <!-- Script de navegación y funcionalidad -->
     <script>
@@ -219,7 +260,7 @@
             }
 
             // Inyectar el SVG en Justificación Técnica
-            const tecnica = document.getElementById('slide-8').querySelector('.border-t');
+            const tecnica = document.getElementById('slide-9').querySelector('.border-t');
             if(tecnica) {
                 const accentDiv = document.createElement('div');
                 accentDiv.innerHTML = CoffeeFlowerSVG;
@@ -233,8 +274,8 @@
         <!-- VISTA PRINCIPAL (Slides de 1 a 11) -->
         <div id="main-pitch-view" style="display: block;">
 
-            <!-- Slide 1 – Portada -->
-            <section id="slide-1" class="slide flex flex-col items-center justify-center p-8 text-center bg-fondo-claro">
+            <!-- Slide 1 – Portada (Fondo: Verde Menta Suave) -->
+            <section id="slide-1" class="slide flex flex-col items-center justify-center p-8 text-center bg-bg-suave">
                 <div class="space-y-6">
                     <!-- Icono de Taza de Café Minimalista (SVG) -->
                     <svg class="icon-taza mx-auto mb-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -249,8 +290,9 @@
                         Diseño, experiencia y activación de marca
                     </h2>
                 </div>
-                <p class="absolute bottom-10 text-lg font-light text-texto-principal/70">
-                    DKorando / Innovar con Alejandro
+                <p class="absolute bottom-10 text-sm font-light text-texto-principal/70">
+                    DKorando / Innovar con Alejandro<br>
+                    <span class="font-bold text-accent-verde">© 2025. Derechos Reservados. Propiedad Intelectual Estratégica.</span>
                 </p>
             </section>
             
@@ -301,7 +343,7 @@
             </section>
 
             <!-- Slide 3 – Moodboard de Materialidad y Textura -->
-            <section id="slide-3-moodboard" class="slide flex flex-col md:flex-row-reverse items-center justify-center p-8 md:p-16 space-y-8 md:space-y-0 md:space-x-12 md:space-x-reverse bg-fondo-claro">
+            <section id="slide-3-moodboard" class="slide flex flex-col md:flex-row-reverse items-center justify-center p-8 md:p-16 space-y-8 md:space-y-0 md:space-x-12 md:space-x-reverse bg-bg-suave">
                 <div class="md:w-1/2 max-w-lg">
                     <img src="https://i.imgur.com/7k0JxAj.png" alt="Moodboard de materiales y texturas orgánicas." class="w-full h-auto rounded-xl shadow-2xl img-effect border-4 border-accent-terracota/50">
                     <p class="mt-4 text-center text-sm italic text-texto-principal/80">Palma, piedra, madera y acentos de terracota.</p>
@@ -315,7 +357,7 @@
             </section>
 
             <!-- Slide 4 – Vista diurna -->
-            <section id="slide-4" class="slide flex flex-col md:flex-row items-center justify-center p-8 md:p-16 space-y-8 md:space-y-0 md:space-x-12 bg-fondo-claro">
+            <section id="slide-4" class="slide flex flex-col md:flex-row items-center justify-center p-8 md:p-16 space-y-8 md:space-y-0 md:space-x-12 bg-bg-suave">
                 <div class="md:w-1/2 max-w-lg">
                     <img src="https://i.imgur.com/PyMuQRc.jpeg" alt="Render de vista diurna del kiosco de café." class="w-full h-auto rounded-xl shadow-2xl img-effect">
                     <p class="mt-4 text-center text-sm italic text-texto-principal/80">Cada saco cuenta una historia.</p>
@@ -329,7 +371,7 @@
             </section>
 
             <!-- Slide 5 – Vista combinada -->
-            <section id="slide-5" class="slide flex flex-col md:flex-row-reverse items-center justify-center p-8 md:p-16 space-y-8 md:space-y-0 md:space-x-12 md:space-x-reverse bg-fondo-claro">
+            <section id="slide-5" class="slide flex flex-col md:flex-row-reverse items-center justify-center p-8 md:p-16 space-y-8 md:space-y-0 md:space-x-12 md:space-x-reverse bg-bg-suave">
                 <div class="md:w-1/2 max-w-lg">
                     <img src="https://i.imgur.com/mPX2iNd.jpeg" alt="Render de vista combinada del kiosco, mostrando detalles estructurales y de marca." class="w-full h-auto rounded-xl shadow-2xl img-effect">
                     <p class="mt-4 text-center text-sm italic text-texto-principal/80">Diseño que conecta con la tierra y la marca.</p>
@@ -343,7 +385,7 @@
             </section>
 
             <!-- Slide 6 – Render nocturno -->
-            <section id="slide-6" class="slide flex flex-col md:flex-row items-center justify-center p-8 md:p-16 space-y-8 md:space-y-0 md:space-x-12 bg-fondo-claro">
+            <section id="slide-6" class="slide flex flex-col md:flex-row items-center justify-center p-8 md:p-16 space-y-8 md:space-y-0 md:space-x-12 bg-bg-suave">
                 <div class="md:w-1/2 max-w-lg">
                     <img src="https://i.imgur.com/zMT6kre.jpeg" alt="Render nocturno del kiosco, con iluminación cálida." class="w-full h-auto rounded-xl shadow-2xl img-effect">
                     <p class="mt-4 text-center text-sm italic text-texto-principal/80">Luz cálida, música y café en movimiento.</p>
@@ -357,7 +399,7 @@
             </section>
 
             <!-- Slide 7 – Plano constructivo (ACTUALIZADO) -->
-            <section id="slide-7" class="slide flex flex-col items-center justify-center p-8 md:p-16 space-y-6 bg-fondo-claro">
+            <section id="slide-7" class="slide flex flex-col items-center justify-center p-8 md:p-16 space-y-6 bg-bg-suave">
                 <h2 class="font-title font-extrabold text-4xl text-accent-terracota text-center">Plano constructivo más reciente</h2>
                 <div class="md:w-3/4 max-w-4xl">
                     <!-- URL del nuevo plano constructivo -->
@@ -370,7 +412,7 @@
             </section>
 
             <!-- Slide 8 – Distribución esquemática y Uniforme -->
-            <section id="slide-8" class="slide flex flex-col items-center justify-center p-8 md:p-16 space-y-8 bg-fondo-claro">
+            <section id="slide-8" class="slide flex flex-col items-center justify-center p-8 md:p-16 space-y-8 bg-bg-suave">
                 <h2 class="font-title font-extrabold text-4xl text-accent-verde text-center">Distribución, Flujo y Equipo (Branding Operativo)</h2>
                 <div class="flex flex-col md:flex-row gap-6 max-w-5xl w-full">
                     <div class="md:w-2/3">
@@ -428,11 +470,15 @@
                         💼 Vista Ejecutiva (Inversión Marte)
                     </button>
                 </div>
+
+                <p class="absolute bottom-4 text-xs font-light text-fondo-claro/70">
+                    <span class="font-bold">© 2025 DKorando / Innovar con Alejandro.</span> Derechos Reservados. Propiedad Intelectual Estratégica.
+                </p>
             </section>
         </div>
         
         <!-- VISTA FINANCIERA JUAN MANUEL (INTERNA) -->
-        <div id="juan-manuel-view" class="financial-view bg-fondo-claro">
+        <div id="juan-manuel-view" class="financial-view bg-bg-suave">
             <button onclick="changeView('main-pitch')" class="absolute top-4 left-4 px-4 py-2 bg-texto-principal text-fondo-claro rounded-full text-sm font-bold shadow-md hover:bg-texto-principal/80 z-10">
                 ← Volver a Presentación
             </button>
@@ -520,7 +566,7 @@
         </div>
 
         <!-- VISTA FINANCIERA MARTE (EJECUTIVA) -->
-        <div id="marte-view" class="financial-view bg-fondo-claro">
+        <div id="marte-view" class="financial-view bg-bg-suave">
             <button onclick="changeView('main-pitch')" class="absolute top-4 left-4 px-4 py-2 bg-texto-principal text-fondo-claro rounded-full text-sm font-bold shadow-md hover:bg-texto-principal/80 z-10">
                 ← Volver a Presentación
             </button>
@@ -580,3 +626,4 @@
 
 </body>
 </html>
+
